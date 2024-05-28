@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000", 
+        origin: "https://chat-chat-frontend.netlify.app", 
         methods: ["GET", "POST"], 
         allowedHeaders: ["Authorization"], 
         credentials: true 
@@ -177,6 +177,16 @@ io.on('connection',async(socket)=> {
     })
 
 });
+
+
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.header('Access-Control-Allow-Credentials', true);
+    next();
+});
+
 
 module.exports = 
 {
