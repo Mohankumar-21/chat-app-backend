@@ -31,6 +31,7 @@ io.on('connection',async(socket)=> {
     
     const token = socket.handshake.auth.token;
     //current user details
+    console.log('token', token);
     const user = await getUserDetail(token)
 
     //creat separate room for each user
