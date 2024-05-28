@@ -12,7 +12,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://main--chat-chat-frontend.netlify.app/", 
+        origin: "http://localhost:3000", 
         methods: ["GET", "POST"], 
         allowedHeaders: ["Authorization"], 
         credentials: true 
