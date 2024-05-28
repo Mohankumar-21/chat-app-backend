@@ -3,7 +3,8 @@ const { Server } = require('socket.io');
 const http = require('http');
 const getUserDetail = require('../middleware/getUserDetail');
 const UserModel = require('../models/userModel');
-const {ConversationModel, MessageModel} = require('../models/conversationSchema')
+const {ConversationModel, MessageModel} = require('../models/conversationSchema');
+const getConversation = require('../middleware/getConversation');
 
 
 
@@ -12,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://main--chat-chat-frontend.netlify.app", 
+        origin: "http://localhost:3000", 
         methods: ["GET", "POST"], 
         allowedHeaders: ["Authorization"], 
         credentials: true 
@@ -149,7 +150,12 @@ io.on('connection',async(socket)=> {
       
         io.to(data?.sender).emit('messages',getconversation?.message || []);
         io.to(data?.receiver).emit('messages',getconversation?.message || []);
-      
+
+        //send immediate conversation in sidebar 
+        const conversationSender = await getConversation(data?.sender);
+        const conversationReceiver = await getConversation(data?.receiver);
+        io.to(data?.sender).emit('conversation',conversationSender || []);
+        io.to(data?.receiver).emit('conversation',conversationReceiver || []);
     })
      
 
@@ -157,40 +163,8 @@ io.on('connection',async(socket)=> {
     socket.on('sidebar',async(currentuserId)=>
     {
          
-        if(currentuserId)
-        {
-            const currentUserConversation = await ConversationModel.find({
-                "$or" : [
-                  {
-                    sender : currentuserId
-                  },
-                  {
-                    receiver : currentuserId
-                  }
-                ]
-            }).sort({updatedAt : -1}).populate("message").populate("sender").populate("receiver")
-    
-            const payload = currentUserConversation.map((msg)=>
-            {
-                const countunSeenMsg = msg.message.reduce((prev,curr)=>
-                {
-                         return prev+(curr.seen ? 0 : 1)
-                },0)
-    
-               return {
-                  _id : msg?._id,
-                  sender : msg?.sender,
-                  receiver : msg?.receiver,
-                  unseenMsg : countunSeenMsg,
-                  lastMsg : msg.message[msg?.message?.length - 1]
-               }
-            })
-           
-            socket.emit('conversation',payload)
-        }
-
-      
-
+        const conversation = await getConversation(currentuserId);
+        socket.emit('conversation',conversation)
     })
     
     //disconnection
