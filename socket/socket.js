@@ -1,19 +1,20 @@
 const express = require('express');
 const { Server } = require('socket.io');
 const http = require('http');
+const dotenv = require('dotenv');
 const getUserDetail = require('../middleware/getUserDetail');
 const UserModel = require('../models/userModel');
 const {ConversationModel, MessageModel} = require('../models/conversationSchema');
 const getConversation = require('../middleware/getConversation');
 
 
-
 const app = express();
+dotenv.config();
 
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://chat-chat-frontend.netlify.app", 
+        origin: `${process.env.FRONTEND_URL}`, 
         methods: ["GET", "POST"], 
         allowedHeaders: ["Authorization"], 
         credentials: true 
